@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <script
+      src="https://use.fontawesome.com/releases/v5.15.4/js/all.js"
+      integrity="sha384-rOA1PnstxnOBLzCLMcre8ybwbTmemjzdNlILg8O7z1lUkLXozs4DHonlDtnE7fpc"
+      crossorigin="anonymous"></script>
+    <h1>Пошук погоди</h1>
+    <div class="search" id="search">
+      <select id="country-select">
+        <option value="uk">Лондон</option>
+        <option value="us">Вашингтон</option>
+        <option value="ua">Київ</option>
+        <option value="fr">Париж</option>
+        <option value="de">Берлін</option>
+      </select>
+      <input type="text" id="search-input" placeholder="Введіть місто" />
+      <input type="button" id="search-button" value="Пошук">
+    </div>
+    <div id="weather"></div>
+    <h3>Погода на 10 днів</h3>
+    <div id="weater10"></div>
+    <script src="script.js"></script>
+  </body>
+</html>

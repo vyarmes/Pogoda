@@ -1,0 +1,164 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin: 40px 0 45px;
+  font-size: 2.9rem;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  color: #ffffff;
+}
+
+#search {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#country-select, #search-input {
+  padding: 15px 20px;
+  background: #111111;
+  border: 1px solid #222222;
+  color: #e0e0e0;
+  font-size: 16px;
+  border-radius: 14px;
+  transition: all 0.3s ease;
+}
+
+#search-input {
+  width: 340px;
+}
+
+#search-input:focus {
+  outline: none;
+  border-color: #555;
+  background: #1a1a1a;
+}
+
+#search-button {
+  padding: 15px 32px;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 15.5px;
+  transition: all 0.3s ease;
+}
+
+#search-button:hover {
+  background: #ddd;
+  transform: translateY(-2px);
+}
+
+#weather {
+  max-width: 580px;
+  margin: 0 auto 50px;
+  background: #111111;
+  border: 1px solid #222222;
+  border-radius: 20px;
+  padding: 40px 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.weather-icon {
+  font-size: 6rem;
+  margin: 10px 0 15px;
+}
+
+.weather-temp {
+  font-size: 4.2rem;
+  font-weight: 700;
+  letter-spacing: -3px;
+  margin: 8px 0;
+  color: #fff;
+}
+
+.weather-description {
+  font-size: 1.25rem;
+  color: #aaaaaa;
+  text-transform: capitalize;
+}
+
+.weather-details {
+  display: flex;
+  justify-content: center;
+  gap: 35px;
+  margin-top: 30px;
+  font-size: 0.98rem;
+  color: #bbbbbb;
+}
+
+h3 {
+  text-align: center;
+  margin: 55px 0 30px;
+  font-size: 1.35rem;
+  color: #777;
+  font-weight: 500;
+}
+
+.forecast-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.forecast-day {
+  background: #111111;
+  border: 1px solid #222222;
+  border-radius: 18px;
+  padding: 22px 16px;
+  min-width: 138px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.forecast-day:hover {
+  background: #1a1a1a;
+  border-color: #444;
+  transform: translateY(-6px);
+}
+
+.forecast-icon {
+  font-size: 2.6rem;
+  margin: 12px 0;
+}
+
+.forecast-temp {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 10px 0 6px;
+}
+
+.forecast-desc {
+  font-size: 0.88rem;
+  color: #999;
+}
+
+body.no-styles {
+  font-family: initial;
+  background: initial;
+  color: initial;
+  min-height: initial;
+  padding: initial;
+}
+
+body.no-styles * {
+  all: initial;
+}
