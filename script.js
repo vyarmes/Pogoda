@@ -3,6 +3,8 @@ const searchInput = document.getElementById('search-input');
 const countrySelect = document.getElementById('country-select');
 const weatherDiv = document.getElementById('weather');
 const weather10Div = document.getElementById('weater10');
+const adWidgetLeft = document.getElementById('ad-widget-left');
+const adWidgetRight = document.getElementById('ad-widget-right');
 
 const WEATHER_CODES = {
   0: 'Ясно', 1: 'Переважно ясно', 2: 'Частково хмарно', 3: 'Хмарно',
@@ -191,4 +193,32 @@ function formatDate(dateStr) {
 window.addEventListener('DOMContentLoaded', () => {
   const firstCity = countrySelect.options[countrySelect.selectedIndex].text;
   getWeather(firstCity);
+  loadAd();
 });
+
+async function loadAd() {
+  if (!adWidgetLeft || !adWidgetRight) return;
+  try {
+    const response = await fetch('reklama.json');
+    const ads = await response.json();
+    if (!ads || ads.length < 8) return;
+    const shuffled = ads.sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, 6);
+
+    adWidgetLeft.innerHTML = selected.slice(0, 3).map(ad => `
+      <div class="ad-item">
+        <img class="ad-image" src="${ad.image}" alt="${ad.name}" />
+        <p class="ad-name">${ad.name}</p>
+      </div>
+    `).join('');
+
+    adWidgetRight.innerHTML = selected.slice(3, 6).map(ad => `
+      <div class="ad-item">
+        <img class="ad-image" src="${ad.image}" alt="${ad.name}" />
+        <p class="ad-name">${ad.name}</p>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.warn('Не вдалося завантажити рекламу');
+  }
+}
