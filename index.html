@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <title>Document</title>
   </head>
@@ -25,16 +26,23 @@
       <input type="text" id="search-input" placeholder="Введіть місто" />
       <input type="button" id="search-button" value="Пошук">
     </div>
-    <div id="weather"></div>
-    <h3>Погода на 10 днів</h3>
+<div id="weather"></div>
+     <div id="map-container" style="max-width: 580px; margin: 0 auto 30px; display: none;">
+       <div id="map" style="height: 300px; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);"></div>
+     </div>
+     <h3>Погода на 10 днів</h3>
     <div id="weater10"></div>
     <div id="ad-widget-left"></div>
     <div id="ad-widget-right"></div>
     <div style="text-align:center;margin:40px 0 20px;">
       <button id="bottom-btn" style="background:transparent;border:none;padding:0;cursor:pointer;outline:none;">
-        <img src="images/click_here.png" alt="Click here" style="display:inline-block;max-width:480px;height:auto;pointer-events:none;" />
+        <img src="images/click_here.png" alt="Click here" style="display:inline-block;max-width:480px;height:auto;pointer-events:none;" href="https://www.youtube.com/results?search_query=%D1%81%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D0%B8+%D1%87%D0%B8%D1%82%D0%B8+%D1%80%D0%BE%D0%B1%D0%BB%D0%BE%D0%BA%D1%81"/>
       </button>
     </div>
+    <div style="text-align:center;margin:20px 0;">
+      <button id="toggle-ad-btn">Відключити рекламу</button>
+    </div>
     <script src="script.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </body>
 </html>
