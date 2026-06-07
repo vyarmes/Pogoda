@@ -1,48 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <title>Document</title>
-  </head>
-  <body>
-    <script
-      src="https://use.fontawesome.com/releases/v5.15.4/js/all.js"
-      integrity="sha384-rOA1PnstxnOBLzCLMcre8ybwbTmemjzdNlILg8O7z1lUkLXozs4DHonlDtnE7fpc"
-      crossorigin="anonymous"></script>
-    <h1>Пошук погоди</h1>
-    <div class="search" id="search">
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Погода</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="sky-clear">
+
+  <canvas id="sky-canvas"></canvas>
+
+  <div id="live-clock">
+    <span id="clock-time">00:00</span>
+    <span id="clock-date"></span>
+  </div>
+
+  <header>
+    <div id="search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="search-input" placeholder="Місто..." autocomplete="off"/>
       <select id="country-select">
-        <option value="uk">Лондон</option>
-        <option value="us">Вашингтон</option>
-        <option value="ua">Київ</option>
-        <option value="fr">Париж</option>
-        <option value="de">Берлін</option>
+        <option value="ua" selected>🇺🇦 Київ</option>
+        <option value="uk">🇬🇧 Лондон</option>
+        <option value="us">🇺🇸 Нью-Йорк</option>
+        <option value="fr">🇫🇷 Париж</option>
+        <option value="de">🇩🇪 Берлін</option>
+        <option value="jp">🇯🇵 Токіо</option>
+        <option value="tr">🇹🇷 Стамбул</option>
+        <option value="ae">🇦🇪 Дубай</option>
+        <option value="br">🇧🇷 Ріо</option>
+        <option value="au">🇦🇺 Сідней</option>
       </select>
-      <input type="text" id="search-input" placeholder="Введіть місто" />
-      <input type="button" id="search-button" value="Пошук">
-    </div>
-<div id="weather"></div>
-     <div id="map-container" style="max-width: 580px; margin: 0 auto 30px; display: none;">
-       <div id="map" style="height: 300px; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);"></div>
-     </div>
-     <h3>Погода на 10 днів</h3>
-    <div id="weater10"></div>
-    <div id="ad-widget-left"></div>
-    <div id="ad-widget-right"></div>
-    <div style="text-align:center;margin:40px 0 20px;">
-      <button id="bottom-btn" style="background:transparent;border:none;padding:0;cursor:pointer;outline:none;">
-        <img src="images/click_here.png" alt="Click here" style="display:inline-block;max-width:480px;height:auto;pointer-events:none;" href="https://www.youtube.com/results?search_query=%D1%81%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D0%B8+%D1%87%D0%B8%D1%82%D0%B8+%D1%80%D0%BE%D0%B1%D0%BB%D0%BE%D0%BA%D1%81"/>
+      <button id="search-button" aria-label="Пошук">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
       </button>
     </div>
-    <div style="text-align:center;margin:20px 0;">
-      <button id="toggle-ad-btn">Відключити рекламу</button>
+  </header>
+
+  <main>
+    <div id="weather"></div>
+    <div id="stats-row"></div>
+
+    <div id="map-container">
+      <div class="map-header">
+        <span>📍 Розташування</span>
+        <span class="map-hint">Клікни — додати мітку</span>
+      </div>
+      <div id="map"></div>
     </div>
-    <script src="script.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  </body>
+
+    <section id="forecast-section">
+      <h3 class="section-label">Прогноз на 10 днів</h3>
+      <div id="weater10"></div>
+    </section>
+
+    <section id="chart-section" style="display:none">
+      <h3 class="section-label">Температура</h3>
+      <div id="temp-chart-wrap">
+        <canvas id="temp-chart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <div id="ad-widget-left"></div>
+  <div id="ad-widget-right"></div>
+
+  <footer>
+    <div id="bottom-btn">
+      <a href="https://www.youtube.com/results?search_query=скачати+читати+роблокс" target="_blank" rel="noopener">
+        <img src="images/click_here.png" alt="Click here"/>
+      </a>
+    </div>
+    <button id="toggle-ad-btn">❌ Сховати рекламу</button>
+    <p class="footer-note">Дані: Open-Meteo · Карта: OpenStreetMap</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
 </html>
