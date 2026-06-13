@@ -362,7 +362,12 @@ function showMap(lat, lon, city) {
     L.marker([lat, lon]).addTo(map).bindPopup(`<b>${city}</b>`).openPopup();
     mapMarkers.forEach(m => L.marker([m.lat, m.lon]).addTo(map).bindPopup(`<b>${m.name}</b>`));
     map.on('click', e => {
-      getWeatherByCoords(e.latlng.lat, e.latlng.lng);
+      const name = prompt('Назва мітки:', '');
+      if (name && name.trim()) {
+        mapMarkers.push({ lat: e.latlng.lat, lon: e.latlng.lng, name: name.trim() });
+        saveMapMarkers();
+        L.marker([e.latlng.lat, e.latlng.lng]).addTo(map).bindPopup(`<b>${name}</b>`).openPopup();
+      }
     });
   } catch(e) { console.error('Map error', e); }
 }
@@ -380,40 +385,6 @@ function showError(msg) {
   weatherDiv.innerHTML = `<div class="error-container"><p class="error-message">${msg}</p><p class="error-hint">💡 Спробуйте ввести назву іншою мовою або перевірте правопис</p></div>`;
   statsRow.innerHTML = '';
   $('weater10').innerHTML = '';
-}
-
-/* ── Get weather by coordinates ──────────────────────── */
-async function getWeatherByCoords(lat, lon) {
-  showLoading();
-  try {
-    const wRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-      `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,relative_humidity_2m,surface_pressure` +
-      `&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,uv_index_max,sunrise,sunset,precipitation_sum` +
-      `&timezone=auto`
-    );
-    if (!wRes.ok) throw new Error('Weather API error');
-    const wData = await wRes.json();
-
-    const revGeoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-    let name = 'Місце', country = '', admin1 = '', population = 0;
-    if (revGeoRes.ok) {
-      const revGeo = await revGeoRes.json();
-      name = revGeo.address?.city || revGeo.address?.town || revGeo.address?.village || 'Місце';
-      country = revGeo.address?.country || '';
-    }
-
-    displayWeather(name, country, admin1, population, wData);
-    displayStats(wData);
-    displayForecast(wData);
-    displayChart(wData);
-    displayAstronomy(wData);
-    drawWindRose(wData);
-    showMap(lat, lon, name);
-  } catch(err) {
-    console.error(err);
-    showError('❌ Помилка при отриманні погоди. Спробуйте іншу точку.');
-  }
 }
 
 /* ── Main fetch ──────────────────────────────────────── */
@@ -442,8 +413,6 @@ async function getWeather(city) {
     displayStats(wData);
     displayForecast(wData);
     displayChart(wData);
-    displayAstronomy(wData);
-    drawWindRose(wData);
     showMap(lat, lon, name);
   } catch(err) {
     console.error(err);
@@ -487,8 +456,7 @@ function displayWeather(city, country, admin1, population, data) {
           </div>
           <div class="weather-desc">${desc}</div>
         </div>
-        <div class="hero-right">
-          <div class="weather-icon-big">${icon}</div>
+        <div class="hero-right">`n          <div id="meteocat-container">`n            <svg id="meteocat" viewBox="0 0 120 140" width="100" height="120">`n              <defs>`n                <radialGradient id="sunGrad" cx="0.3" cy="0.3" r="0.7">`n                  <stop offset="0%" stop-color="#fde68a"/>`n                  <stop offset="70%" stop-color="#fbbf24"/>`n                  <stop offset="100%" stop-color="#f59e0b"/>`n                </radialGradient>`n                <radialGradient id="cloudGrad" cx="0.3" cy="0.3" r="0.7">`n                  <stop offset="0%" stop-color="#cbd5e1"/>`n                  <stop offset="100%" stop-color="#94a3b8"/>`n                </radialGradient>`n              </defs>`n              <ellipse id="cat-body" cx="60" cy="90" rx="35" ry="40" fill="#e2e8f0"/>`n              <circle id="cat-head" cx="60" cy="60" r="30" fill="#f8fafc"/>`n              <g id="weather-accessory"></g>`n              <circle cx="50" cy="55" r="4"/>`n              <circle cx="70" cy="55" r="4"/>`n              <path id="cat-smile" d="M52 72 Q60 78 68 72" stroke="#64748b" stroke-width="2" fill="none" stroke-linecap="round"/>`n            </svg>`n          </div>`n          <div class="weather-icon-big">${icon}</div>
           <div class="feels-pill">відчувається як ${feel}°C</div>
         </div>
       </div>
@@ -684,160 +652,6 @@ function displayChart(data) {
   }
 }
 
-/* ── Geolocation ─────────────────────────────────────── */
-function useGeolocation() {
-  const btn = $('geo-button');
-  if (!btn) return;
-  
-  btn.classList.add('loading');
-  btn.textContent = '🔄';
-  
-  if (!navigator.geolocation) {
-    showError('Геолокація не підтримується вашим браузером');
-    btn.classList.remove('loading');
-    btn.textContent = '📍';
-    return;
-  }
-  
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      getWeatherByCoords(pos.coords.latitude, pos.coords.longitude);
-      btn.classList.remove('loading');
-      btn.textContent = '📍';
-    },
-    err => {
-      console.error('Geolocation error:', err);
-      showError('❌ Не вдалося отримати вашу геолокацію. Перевірте дозволи браузера');
-      btn.classList.remove('loading');
-      btn.textContent = '📍';
-    }
-  );
-}
-
-/* ── Astronomy / Moon phase ──────────────────────────– */
-function getMoonPhase(date) {
-  const phases = ['🌑 Новий', '🌒 Молодик', '🌓 Перша чверть', '🌔 Першої половини', 
-                  '🌕 Повня', '🌖 Останньої половини', '🌗 Остання чверть', '🌘 Старик'];
-  const d = new Date(date);
-  const knownNewMoon = new Date(2000, 0, 6);
-  const lunaCycle = 29.53;
-  const diff = (d - knownNewMoon) / (1000 * 60 * 60 * 24);
-  const phase = Math.floor((diff % lunaCycle) / (lunaCycle / 8));
-  return phases[Math.max(0, Math.min(7, phase))];
-}
-
-function displayAstronomy(data) {
-  const daily = data.daily;
-  const today = 0;
-  const sunrise = daily.sunrise[today].split('T')[1];
-  const sunset = daily.sunset[today].split('T')[1];
-  const date = daily.time[today];
-  
-  const html = `
-    <div class="astro-item">
-      <div class="astro-label">Рассвіт</div>
-      <div class="astro-value">🌅</div>
-      <div class="astro-desc">${sunrise}</div>
-    </div>
-    <div class="astro-item">
-      <div class="astro-label">Захід</div>
-      <div class="astro-value">🌄</div>
-      <div class="astro-desc">${sunset}</div>
-    </div>
-    <div class="astro-item">
-      <div class="astro-label">Місяць</div>
-      <div class="astro-value">${getMoonPhase(date).split(' ')[0]}</div>
-      <div class="astro-desc">${getMoonPhase(date).split(' ')[1]}</div>
-    </div>
-    <div class="astro-item">
-      <div class="astro-label">Видимість</div>
-      <div class="astro-value">⭐</div>
-      <div class="astro-desc">Добра</div>
-    </div>
-  `;
-  $('astronomy-data').innerHTML = html;
-  $('astronomy-section').style.display = 'block';
-}
-
-/* ── Wind Rose / Wind Direction Chart ────────────────– */
-function drawWindRose(data) {
-  const canvas = $('wind-rose-canvas');
-  if (!canvas || !canvas.getContext) return;
-  
-  const ctx = canvas.getContext('2d');
-  const width = 400;
-  const height = 400;
-  const radius = 140;
-  const centerX = width / 2;
-  const centerY = height / 2;
-  
-  canvas.width = width;
-  canvas.height = height;
-  
-  // Draw background
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
-  ctx.fillRect(0, 0, width, height);
-  
-  // Draw circles
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-  ctx.lineWidth = 1;
-  for (let i = 1; i <= 4; i++) {
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, (radius / 4) * i, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-  
-  // Draw directions
-  ctx.fillStyle = 'rgba(240, 248, 255, 0.4)';
-  ctx.font = 'bold 14px Outfit';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
-  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  dirs.forEach((dir, i) => {
-    const angle = (i * 45) * Math.PI / 180 - Math.PI / 2;
-    const x = centerX + Math.cos(angle) * (radius + 20);
-    const y = centerY + Math.sin(angle) * (radius + 20);
-    ctx.fillText(dir, x, y);
-  });
-  
-  // Draw wind bars for each day
-  const windSpeeds = data.daily?.wind_speed_10m_max;
-  
-  if (!windSpeeds) return;
-  
-  ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  
-  const currentWindDir = data.current?.wind_direction_10m || 0;
-  
-  for (let i = 0; i < Math.min(8, windSpeeds.length); i++) {
-    const speed = windSpeeds[i];
-    const dir = currentWindDir + (i * 5);
-    const angle = dir * Math.PI / 180 - Math.PI / 2;
-    const len = (speed / 30) * radius;
-    
-    const x1 = centerX + Math.cos(angle) * 10;
-    const y1 = centerY + Math.sin(angle) * 10;
-    const x2 = centerX + Math.cos(angle) * (10 + len);
-    const y2 = centerY + Math.sin(angle) * (10 + len);
-    
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-  }
-  
-  // Draw center circle
-  ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
-  ctx.fill();
-  
-  $('wind-rose-section').style.display = 'block';
-}
-
 /* ── Event bindings ──────────────────────────────────── */
 function performSearch() {
   const city = $('search-input').value.trim();
@@ -853,7 +667,6 @@ $('country-select').addEventListener('change', e => {
   getWeather(city);
 });
 $('search-input').addEventListener('input', () => { $('country-select').value = ''; });
-$('geo-button').addEventListener('click', useGeolocation);
 
 /* ── Ad toggle ───────────────────────────────────────── */
 function initAdToggle() {

@@ -43,6 +43,9 @@
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
       </button>
+      <button id="geo-button" aria-label="Моя геолокація" title="Показати погоду в моєму місцезнаходженні">
+        📍
+      </button>
     </div>
   </header>
 
@@ -61,6 +64,18 @@
     <section id="forecast-section">
       <h3 class="section-label">Прогноз на 10 днів</h3>
       <div id="weater10"></div>
+    </section>
+
+    <section id="astronomy-section" style="display:none">
+      <h3 class="section-label">🌙 Астрономія</h3>
+      <div id="astronomy-data"></div>
+    </section>
+
+    <section id="wind-rose-section" style="display:none">
+      <h3 class="section-label">💨 Розетка ветрів</h3>
+      <div id="wind-rose-container">
+        <canvas id="wind-rose-canvas"></canvas>
+      </div>
     </section>
 
     <section id="chart-section" style="display:none">
