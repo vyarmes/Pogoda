@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Погода - вхід</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body class="sky-clear">
+  <canvas id="sky-canvas"></canvas>
+
+  <div id="live-clock">
+    <span id="clock-time">00:00</span>
+    <span id="clock-date"></span>
+  </div>
+
+  <main>
+    <div class="auth-card">
+      <h1 class="auth-title">Вхід</h1>
+      <form id="loginForm" autocomplete="off">
+        <div class="field">
+          <label for="username" class="field-label">Ім'я користувача</label>
+          <input type="text" id="username" name="username" class="field-input" required />
+        </div>
+        <div class="field">
+          <label for="password" class="field-label">Пароль</label>
+          <input type="password" id="password" name="password" class="field-input" required />
+        </div>
+        <div class="field field-check">
+          <label class="check">
+            <input type="checkbox" id="captcha" />
+            <span class="check-box"></span>
+            <span class="check-text">Я не робот</span>
+          </label>
+        </div>
+        <button type="submit" class="submit-btn">Увійти</button>
+        <p class="auth-hint">
+          Немає акаунту?
+          <a href="/reg.html" class="link">Зареєструватися</a>
+        </p>
+      </form>
+    </div>
+  </main>
+
+  <script src="login.js"></script>
+</body>
+</html>

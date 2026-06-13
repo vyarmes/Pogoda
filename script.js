@@ -841,8 +841,10 @@ function drawWindRose(data) {
 /* ── Event bindings ──────────────────────────────────── */
 function performSearch() {
   const city = $('search-input').value.trim();
-  if (city) getWeather(city);
-  else showError('Будь ласка, введіть назву міста');
+  if (city) {
+    saveHistory(city);
+    getWeather(city);
+  } else showError('Будь ласка, введіть назву міста');
 }
 
 $('search-button').addEventListener('click', performSearch);
@@ -888,7 +890,103 @@ async function loadAd() {
   } catch(e) { console.warn('Ad load failed'); }
 }
 
-/* ── Init ────────────────────────────────────────────── */
+/* ── User badge + Profile panel ────────────────────────── */
+function initUserBadge() {
+  const badge = document.getElementById('user-badge');
+  if (!badge) return;
+  const panel = document.getElementById('profile-panel');
+  if (!panel) return;
+
+  let session = null;
+  try {
+    const raw = sessionStorage.getItem('pogoda_session');
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data.expiresAt && data.expiresAt > Date.now()) session = data;
+      else sessionStorage.removeItem('pogoda_session');
+    }
+  } catch (e) {}
+
+  if (!session) {
+    const name = localStorage.getItem('pogoda_username');
+    if (!name) return;
+    session = { username: name, token: null };
+  }
+
+  const getAuthHeader = () => session.token ? { 'x-session-token': session.token } : {};
+  const api = (path, opts = {}) => fetch('/api/session', { headers: { 'Content-Type': 'application/json', ...getAuthHeader() } }).catch(() => null);
+
+  document.getElementById('user-name').textContent = session.username;
+  document.getElementById('profile-username').textContent = session.username;
+  badge.style.display = 'flex';
+
+  const openPanel = async () => {
+    const vis = panel.style.display !== 'none';
+    panel.style.display = vis ? 'none' : 'block';
+    if (!vis) {
+      const details = document.getElementById('profile-details');
+      const historyBox = document.getElementById('profile-history');
+      details.innerHTML = `
+        <div class="profile-row"><span class="label">Нікнейм</span><span class="value">${session.username}</span></div>
+        <div class="profile-row"><span class="label">Стан</span><span class="value">🟢 Онлайн</span></div>`;
+      historyBox.innerHTML = `<div class="history-empty">Завантаження...</div>`;
+      try {
+        let sessionData = null;
+        if (session.token) {
+          const res = await fetch('/api/session', { headers: { 'Content-Type': 'application/json', 'x-session-token': session.token } });
+          sessionData = await res.json();
+        }
+        const history = sessionData?.user?.history || [];
+        if (!history.length) {
+          historyBox.innerHTML = `<div class="history-empty">Історія порожня</div>`;
+          return;
+        }
+        historyBox.innerHTML = history.map((q, i) => `
+          <button class="history-item" data-query="${q.replace(/"/g, '&quot;')}">
+            <span class="history-index">${i + 1}</span>
+            <span class="history-query">${q}</span>
+          </button>`).join('');
+        historyBox.querySelectorAll('.history-item').forEach(btn => btn.addEventListener('click', () => {
+          const q = btn.getAttribute('data-query');
+          $('search-input').value = q;
+          getWeather(q);
+        }));
+      } catch {
+        historyBox.innerHTML = `<div class="history-empty">Не вдалося завантажити історію</div>`;
+      }
+    }
+  };
+
+  badge.addEventListener('click', (e) => { e.stopPropagation(); openPanel(); });
+
+  document.addEventListener('click', (e) => {
+    if (!badge.contains(e.target) && !panel.contains(e.target)) panel.style.display = 'none';
+  });
+
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      try { sessionStorage.removeItem('pogoda_session'); } catch (e) {}
+      try { localStorage.removeItem('pogoda_username'); } catch (e) {}
+      window.location.href = '/login.html';
+    });
+  }
+}
+
+/* ── Save search history ───────────────────────────────── */
+function saveHistory(query) {
+  const raw = sessionStorage.getItem('pogoda_session');
+  if (!raw) return;
+  const session = JSON.parse(raw);
+  if (!session.token) return;
+  fetch('/api/history', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-session-token': session.token },
+    body: JSON.stringify({ query })
+  }).catch(() => {});
+}
+
+/* ── Init ──────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
   startClock();
   initParticles('clear');
@@ -896,6 +994,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadMapMarkers();
   initAdToggle();
   loadAd();
+  initUserBadge();
 
   const defaultCity = $('country-select').options[$('country-select').selectedIndex]
     .text.replace(/^[\p{Emoji}\s]+/u, '').trim();
